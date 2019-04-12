@@ -81,6 +81,24 @@ function DeletePreExistingFiles($targetPath)
     }
 }
 
+function FindMsbuildFromPath() {
+    try {
+        return Get-Command msbuild -ErrorAction SilentlyContinue
+    } catch {
+        ## For some reason I also need to catch here
+    }
+}
+
+function FindMsbuildFromProgramFiles() {
+    $installPath = (& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+        | Where-Object { $_.StartsWith("installationPath") }).Split(" ", 2)[-1]
+    $msBuildExe = Get-ChildItem -Path $installPath -Name "msbuild.exe" -Recurse
+    if ($msBuildExe -is [Array]) {
+        $msBuildExe = $msBuildExe[0]
+    }
+    return $msBuildExe
+}
+
 if ([string]::IsNullOrEmpty($OutputPath)) {
     $OutputPath = Join-Path $(Get-ScriptDirectory) bin
 }
@@ -110,16 +128,26 @@ if ([string]::IsNullOrEmpty($ScriptSigningIdentity)) {
 }
 
 if (-not([string]::IsNullOrEmpty($SignType))) {
-	try {
-		$msbuild = Get-Command msbuild -ErrorAction SilentlyContinue
+    $errMsg = ""
+    try {
+        $msbuild = FindMsbuildFromPath
+    } catch {
+        $errMsg = $_.Exception.Message + "`n"
+        Write-Info "Error getting msbuild command from path $_"
+    }
 
-		if ($msbuild -eq $null) {
-			throw "MsBuild.exe not on path"
-		}
-	}
-	catch {
-		throw "Could not find msbuild: $($_.Exception.Message)"
-	}
+    if (!$msbuild) {
+        try {
+            $msbuild = FindMsbuildFromProgramFiles
+        } catch {
+            $errMsg += $_.Exception.Message
+            Write-Info "Error getting msbuild exe from program files $_"
+        }
+    }
+
+    if (!$msbuild) {
+        throw "Could not find msbuild: $($_.Exception.Message)"
+    }
 
 	if ([string]::IsNullOrEmpty($SigningIdentity)) {
 	  throw "SigningIdentity required to produce a signed build"

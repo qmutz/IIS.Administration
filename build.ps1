@@ -51,7 +51,7 @@ function Publish() {
 function EnsureIISFeatures() {
     Get-WindowsOptionalFeature -Online `
         | Where-Object {$_.FeatureName -match "IIS-" -and $_.State -eq [Microsoft.Dism.Commands.FeatureState]::Disabled} `
-        | ForEach-Object {Enable-WindowsOptionalFeature -Online -FeatureName $_.FeatureName}
+        | ForEach-Object {Enable-WindowsOptionalFeature -Online -FeatureName $_.FeatureName -NoRestart}
 }
 
 function InstallTestService() {
