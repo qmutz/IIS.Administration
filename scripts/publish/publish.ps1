@@ -133,7 +133,7 @@ if (-not([string]::IsNullOrEmpty($SignType))) {
         $msbuild = FindMsbuildFromPath
     } catch {
         $errMsg = $_.Exception.Message + "`n"
-        Write-Info "Error getting msbuild command from path $_"
+        Write-Information "Error getting msbuild command from path $_"
     }
 
     if (!$msbuild) {
@@ -141,7 +141,7 @@ if (-not([string]::IsNullOrEmpty($SignType))) {
             $msbuild = FindMsbuildFromProgramFiles
         } catch {
             $errMsg += $_.Exception.Message
-            Write-Info "Error getting msbuild exe from program files $_"
+            Write-Information "Error getting msbuild exe from program files $_"
         }
     }
 
