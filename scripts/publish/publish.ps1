@@ -129,10 +129,7 @@ if ([string]::IsNullOrEmpty($ScriptSigningIdentity)) {
 
 Write-Host "Program files: `n"
 Get-ChildItem -Path "${env:ProgramFiles(x86)}"
-
-Get-ChildItem -Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio"
-
-Get-ChildItem -Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer"
+Get-ChildItem -Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0"
 
 if (-not([string]::IsNullOrEmpty($SignType))) {
     $errMsg = ""
@@ -153,7 +150,8 @@ if (-not([string]::IsNullOrEmpty($SignType))) {
     }
 
     if (!$msbuild) {
-        throw "Could not find msbuild: $errMsg"
+        Write-Information "Could not find msbuild: $errMsg"
+        $msbuild = "${env:ProgramFiles(x86)}"
     }
 
 	if ([string]::IsNullOrEmpty($SigningIdentity)) {
