@@ -127,6 +127,14 @@ if ([string]::IsNullOrEmpty($ScriptSigningIdentity)) {
   $ScriptSigningIdentity = $SigningIdentity
 }
 
+Write-Host "Program files: `n"
+Get-ChildItem -Path "${env:ProgramFiles(x86)}"
+
+Write-Host "`n`nProgram files x64: `n"
+Get-ChildItem -Path "${env:ProgramFiles}"
+
+Write-Host "`n`n"
+
 if (-not([string]::IsNullOrEmpty($SignType))) {
     $errMsg = ""
     try {
@@ -146,7 +154,7 @@ if (-not([string]::IsNullOrEmpty($SignType))) {
     }
 
     if (!$msbuild) {
-        throw "Could not find msbuild: $($_.Exception.Message)"
+        throw "Could not find msbuild: $errMsg"
     }
 
 	if ([string]::IsNullOrEmpty($SigningIdentity)) {
