@@ -129,7 +129,7 @@ if ([string]::IsNullOrEmpty($ScriptSigningIdentity)) {
 
 Write-Host "Program files: `n"
 Get-ChildItem -Path "${env:ProgramFiles(x86)}"
-Get-ChildItem -Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio 14.0"
+Get-ChildItem -Path "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2017"
 
 if (-not([string]::IsNullOrEmpty($SignType))) {
     $errMsg = ""
