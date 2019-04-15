@@ -28,9 +28,14 @@ jobs:
       clean: false
       submodules: true
 
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet restore'
+      inputs:
+        command: restore
+
     - task: PowerShell@2
       displayName: 'PowerShell Script build.ps1'
       inputs:
         targetType: filePath
         filePath: ./build.ps1
-        arguments: '-devSetup -install -test -verbose'
+        arguments: '-devSetup -install AppAndDependencies -test -verbose'

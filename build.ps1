@@ -4,7 +4,8 @@ param(
     [switch]
     $devSetup,
 
-    [switch]
+    [ValidateSet('AppOnly', 'AppAndDependencies')]
+    [string]
     $install,
 
     [switch]
@@ -17,7 +18,19 @@ param(
     $installPath = (Join-Path $env:ProgramFiles "IIS Administration"),
 
     [int]
-    $testPort = 44326
+    $testPort = 44326,
+
+    [version]
+    $dotnetMinVersion = "2.1.0",
+
+    [version]
+    $aspnetMinVersion = $dotnetMinVersion,
+
+    [string]
+    $dotnetDownloadPath = "https://download.visualstudio.microsoft.com/download/pr/b9cefae4-7f05-4dea-9fb0-3328aaddb2ee/545e5c4e0eeff6366523209935376002/dotnet-runtime-2.1.9-win-x64.exe",
+
+    [string]
+    $aspnetDownloadPath = "https://download.visualstudio.microsoft.com/download/pr/ece6ec5c-4bdb-494b-994b-3ece386e404a/436e42bf7c68b8455953d2d3285c27ed/aspnetcore-runtime-2.1.9-win-x64.exe"
 )
 
 $ErrorActionPreference = "Stop"
@@ -123,6 +136,13 @@ function GetGlobalVariable($name) {
     & ([System.IO.Path]::Combine($scriptDir, "setup", "globals.ps1")) $name
 }
 
+function InstallFromWeb($product, $url) {
+    Write-Warning "Installing missing dependency $product, the dependency will NOT be removed during build cleanup"
+    $installer = Join-Path $env:TMP "${product}-installer.exe"
+    Invoke-WebRequest $url -OutFile $installer
+    & $installer /s
+}
+
 ########################################################### Main Script ##################################################################
 $debug = $PSBoundParameters['debug']
 $user = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
@@ -154,6 +174,22 @@ try {
     Publish
     
     if ($install) {
+        if ($install -eq "AppAndDependencies") {
+            $installDotnet = $true
+            $platform = ("x86", "x64")[[Environment]::Is64BitProcess]
+            $dotnet = Get-Item -Path "HKLM:SOFTWARE\dotnet\Setup\InstalledVersions\$platform\sharedhost" -ErrorAction SilentlyContinue
+            if ($dotnetMinVersion -le $dotnet.GetValue("Version")) {
+                $installDotnet = $false
+            }
+            if ($installDotnet) {
+                InstallFromWeb ".NET Core Runtime" $dotnetDownloadPath
+            }
+
+            $aspNet = Get-Item -Path "HKLM:SOFTWARE\Microsoft\ASP.NET Core\Shared Framework\v$($aspnetMinVersion.Major).$($aspnetMinVersion.Minor)" -ErrorAction SilentlyContinue
+            if (!$aspNet) {
+                InstallFromWeb "ASP.NET Shared Framework" $aspnetDownloadPath
+            }
+        }
         Write-Host "$(BuildHeader) Installing service..."
         InstallTestService
     }
