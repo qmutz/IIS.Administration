@@ -90,12 +90,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IIS.Administratio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IIS.Administration.WebServer.Monitoring", "src\Microsoft.IIS.Administration.WebServer.Monitoring\Microsoft.IIS.Administration.WebServer.Monitoring.csproj", "{6FDC4BDA-91D3-4269-B89B-043EDC7768F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.IIS.Administration.Tests", "test\Microsoft.IIS.Administration.Tests\Microsoft.IIS.Administration.Tests.csproj", "{F1AEBED1-CE86-48D2-8389-6559A088B6F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IIS.Administration.Tests", "test\Microsoft.IIS.Administration.Tests\Microsoft.IIS.Administration.Tests.csproj", "{F1AEBED1-CE86-48D2-8389-6559A088B6F8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A3ADB83A-C602-4DE4-A8DD-085FE5DD29CD} = {A3ADB83A-C602-4DE4-A8DD-085FE5DD29CD}
 		{46906A4C-6A49-4D1D-B556-DBBD6F744976} = {46906A4C-6A49-4D1D-B556-DBBD6F744976}
 		{5D3BEEB8-5798-4037-8BB0-A35A7A42999A} = {5D3BEEB8-5798-4037-8BB0-A35A7A42999A}
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{81E62759-F2D3-4911-B058-9303FB2680A6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IIS.Administration.PsSetup", "scripts\Microsoft.IIS.Administration.PsSetup.csproj", "{D9A948E2-3A43-4654-A49A-E33F62C070BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -251,6 +255,10 @@ Global
 		{F1AEBED1-CE86-48D2-8389-6559A088B6F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1AEBED1-CE86-48D2-8389-6559A088B6F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1AEBED1-CE86-48D2-8389-6559A088B6F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9A948E2-3A43-4654-A49A-E33F62C070BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9A948E2-3A43-4654-A49A-E33F62C070BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9A948E2-3A43-4654-A49A-E33F62C070BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9A948E2-3A43-4654-A49A-E33F62C070BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -293,6 +301,7 @@ Global
 		{AE4B4D83-70CB-4194-82B1-57DF26279A47} = {BC25CF2F-4139-4D3F-9DC5-279FD380D0F2}
 		{6FDC4BDA-91D3-4269-B89B-043EDC7768F7} = {BC25CF2F-4139-4D3F-9DC5-279FD380D0F2}
 		{F1AEBED1-CE86-48D2-8389-6559A088B6F8} = {5504DA5E-BCF3-409E-A285-E59EDBBBB8B8}
+		{D9A948E2-3A43-4654-A49A-E33F62C070BA} = {81E62759-F2D3-4911-B058-9303FB2680A6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5961521-6D78-4B19-9B46-BC648CC42DB1}

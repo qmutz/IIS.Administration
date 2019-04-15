@@ -1,0 +1,103 @@
+
+jobs:
+- job: publish-sign
+  pool:
+    name: 'Hosted VS2017'  # name of the pool to run this job in
+    demands:
+      - msbuild
+      - visualstudio
+  steps:
+    - checkout: self
+      clean: false
+      submodules: true
+      
+    - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
+      displayName: 'Install Signing Plugin'
+      inputs:
+        signType: real
+
+    - task: MSBuild@1
+      displayName: 'Build Application'
+      inputs:
+        solution: src/Microsoft.IIS.Administration
+        msbuildVersion: 14.0
+        configuration: release
+        msbuildArguments: '/t:publish /p:Configuration=release /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration /p:SignType=real /p:SigningIdentity=400'
+
+    - task: MSBuild@1
+      displayName: 'Build Packager'
+      inputs:
+        solution: src/Packager/Bundle
+        msbuildVersion: 14.0
+        configuration: release
+        msbuildArguments: '/t:publish /p:Configuration=release /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration/plugins /p:SignType=real /p:SigningIdentity=400'
+
+    - task: MSBuild@1
+      displayName: 'Build setup scripts'
+      inputs:
+        solution: scripts
+        msbuildVersion: 14.0
+        configuration: release
+        msbuildArguments: '/p:SignType=real /p:SigningIdentity=400'
+
+    - task: CopyFiles@2
+      displayName: 'Copy setup scripts'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)/scripts/bin/signed/setup'
+        Contents: '*.*'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/IIS.Administration/setup'
+        OverWrite: true
+        flattenFolders: false
+
+    - task: CopyFiles@2
+      displayName: 'Copy 3rd Party Notice'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: 'ThirdPartyNotices.txt'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/IIS.Administration'
+        OverWrite: true
+        flattenFolders: true
+
+    - task: PowerShell@1
+      displayName: 'Post-publish clean up'
+      inputs:
+        scriptName: '$(Build.SourcesDirectory)\scripts\publish\post-publish.ps1 '
+        arguments: '-OutputPath $(Build.ArtifactStagingDirectory)/IIS.Administration'
+
+    - task: ms-vseng.MicroBuildShipTasks.7c429315-71ba-4cb3-94bb-f829c95f7915.MicroBuildCodesignVerify@2
+      displayName: 'Verify Signed Files'
+      inputs:
+        TargetFolders: '$(Build.ArtifactStagingDirectory)/IIS.Administration'
+
+    - task: CopyFiles@2
+      displayName: 'Copy Symbols'
+      inputs:
+        SourceFolder: '$(Build.SourcesDirectory)'
+        Contents: '**/Microsoft.IIS.Administration*pdb'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/symbols'
+        OverWrite: true
+        flattenFolders: true
+
+    - task: PublishSymbols@1
+      displayName: 'Enable Source Server'
+      inputs:
+        SymbolsFolder: '$(Build.ArtifactStagingDirectory)/symbols'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: Symbols'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/symbols'
+        ArtifactName: symbols
+
+    - task: ms-vscs-artifact.build-tasks.artifactSymbolTask-1.artifactSymbolTask@0
+      displayName: 'Publish Symbols on Symweb'
+      inputs:
+        symbolServiceURI: 'https://devdiv.artifacts.visualstudio.com/DefaultCollection'
+        sourcePath: '$(Build.ArtifactStagingDirectory)/symbols'
+        usePat: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact: IIS Administration'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/IIS.Administration'
+        ArtifactName: IIS.Administration

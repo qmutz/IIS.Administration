@@ -35,18 +35,10 @@ try {
     # Create them from defaults if they don't exist
     $configDir = Join-Path $solutionDir "src/microsoft.iis.administration/config"
 
-    if (-not(Test-Path $(Join-Path $configDir "appsettings.json"))) {
-        Copy-Item $(Join-Path $configDir "appsettings.default.json") $(Join-Path $configDir "appsettings.json")
-
-        Write-Host "appsettings.json created at $(Join-Path $configDir "appsettings.json")"
-        Write-Host "Add users to the 'users' section to grant access to the application"
-        Write-Host "Add ""manage.iis.net"" to the cors rule if you wish to manage IIS through browser"
-        Write-Host "For more info about the security configuration visit https://docs.microsoft.com/en-us/iis-administration/configuration/appsettings.json#security"
-    }
-
-    if (-not(Test-Path $(Join-Path $configDir "modules.json"))) {
-        Copy-Item $(Join-Path $configDir "modules.default.json") $(Join-Path $configDir "modules.json")
-    }
+    Write-Host "appsettings.json located at $(Join-Path $configDir "appsettings.json")"
+    Write-Host "Add users to the 'users' section to grant access to the application"
+    Write-Host "Add ""manage.iis.net"" to the cors rule if you wish to manage IIS through browser"
+    Write-Host "For more info about the security configuration visit https://docs.microsoft.com/en-us/iis-administration/configuration/appsettings.json#security"
 
     try {
         $solutionRoot = git rev-parse --show-toplevel

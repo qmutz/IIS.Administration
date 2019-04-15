@@ -179,10 +179,6 @@ if(!$outputConfigPathExists) {
     New-Item $outputConfigPath -Type directory | Out-Null
 }
 
-Copy-Item (Join-Path $configFolderPath "modules.default.json") (Join-Path $outputConfigPath "modules.json")  -Force -ErrorAction Stop;
-Copy-Item (Join-Path $configFolderPath "api-keys.default.json") (Join-Path $outputConfigPath "api-keys.json")  -Force -ErrorAction Stop;
-Copy-Item (Join-Path $configFolderPath "appsettings.default.json") (Join-Path $outputConfigPath "appsettings.json")  -Force -ErrorAction Stop;
-
 # Dlls required for plugins reside in the plugins folder at dev time
 $pluginFolder = Join-Path $ProjectPath "plugins"
 $outputPluginsFolder = Join-Path $applicationPath "plugins"
@@ -244,34 +240,7 @@ else {
 # Copy thirdpartynotices.txt
 Copy-Item $(Join-Path $(Get-SolutionDirectory) ThirdPartyNotices.txt) $OutputPath -ErrorAction Stop
 
-# Remove all unnecessary files
-if (-not($ConfigDebug)) {
-	Get-ChildItem $OutputPath *.pdb -Recurse | Remove-Item -Force | Out-Null
-}
-
-# Remove non-windows runtime dlls
-$runtimeDirs = Get-ChildItem -Recurse $OutputPath runtimes
-foreach ($runtimeDir in $runtimeDirs) {
-    Get-ChildItem $runtimeDir.FullName | Where-Object { $_.name -ne "win" } | ForEach-Object { Remove-Item $_.FullName -Force -Recurse }
-}
-
-# Remove non dlls from plugins
-Get-ChildItem $outputPluginsFolder -File | where {-not($_.Name -match ".dll$")} | Remove-Item -Force
-Remove-Item (Join-Path $outputPluginsFolder Bundle.dll) -Force
-
-$mainDlls = Get-ChildItem $applicationPath *.dll
-$mainDlls += $(Get-ChildItem -Recurse $applicationPath/runtimes/*.dll)
-$pluginDlls = Get-ChildItem -Recurse $outputPluginsFolder *.dll
-
-# Ensure no intersection between plugin dlls and application dlls
-foreach ($pluginDll in $pluginDlls) {
-	foreach ($mainDll in $mainDlls) {
-		if ($mainDll.Name -eq $pluginDll.Name) {
-			Remove-Item $pluginDll.FullName -Force | Out-Null
-			break
-		}
-	}
-}
+& (Join-Path $PSScriptRoot post-publish.ps1) -OutputPath $OutputPath -ConfigDebug:$ConfigDebug
 
 $publishVersion = $(Get-VersionObject).version
 Write-Host "Finished publishing $applicationName $publishVersion"
