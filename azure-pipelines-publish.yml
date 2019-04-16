@@ -1,44 +1,58 @@
+parameters:
+  agentPoolName: ''
+  agentPoolDemandTeam: ''
+  teamName: 'IIS'
+  signType: 'test'
+  signingIdentity: 'Microsoft'
+  buildConfiguration: 'Release'
+  indexSourcesAndPublishSymbols: 'false'
 
 jobs:
 - job: publish_and_sign
   pool:
-    name: 'Hosted VS2017'  # name of the pool to run this job in
+    name: ${{ parameters.agentPoolName }}
     demands:
       - msbuild
       - visualstudio
+      - ${{ if ne(parameters.agentPoolDemandTeam, '') }}:
+        - Team -equals ${{ parameters.agentPoolDemandTeam }}
+
+  variables:
+    TeamName: ${{ parameters.teamName }} # required by MicroBuildTasks
+
   steps:
     - checkout: self
-      clean: false
+      clean: true
       submodules: true
       
     - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@2
       displayName: 'Install Signing Plugin'
       inputs:
-        signType: real
+        signType: ${{ parameters.signType }}
 
     - task: MSBuild@1
       displayName: 'Build Application'
       inputs:
         solution: src/Microsoft.IIS.Administration
         msbuildVersion: 14.0
-        configuration: release
-        msbuildArguments: '/t:publish /p:Configuration=release /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration /p:SignType=real /p:SigningIdentity=400'
+        configuration: ${{ parameters.buildConfiguration }}
+        msbuildArguments: '/t:publish /p:Configuration=${{ parameters.buildConfiguration }} /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration /p:SignType=${{ parameters.signType }} /p:SigningIdentity=${{ parameters.signingIdentity }}'
 
     - task: MSBuild@1
       displayName: 'Build Packager'
       inputs:
         solution: src/Packager/Bundle
         msbuildVersion: 14.0
-        configuration: release
-        msbuildArguments: '/t:publish /p:Configuration=release /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration/plugins /p:SignType=real /p:SigningIdentity=400'
+        configuration: ${{ parameters.buildConfiguration }}
+        msbuildArguments: '/t:publish /p:Configuration=${{ parameters.buildConfiguration }} /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration/plugins /p:SignType=${{ parameters.signType }} /p:SigningIdentity=${{ parameters.signingIdentity }}'
 
     - task: MSBuild@1
       displayName: 'Build setup scripts'
       inputs:
         solution: scripts
         msbuildVersion: 14.0
-        configuration: release
-        msbuildArguments: '/p:SignType=real /p:SigningIdentity=400'
+        configuration: ${{ parameters.buildConfiguration }}
+        msbuildArguments: '/p:SignType=${{ parameters.signType }} /p:SigningIdentity=${{ parameters.signingIdentity }}'
 
     - task: CopyFiles@2
       displayName: 'Copy setup scripts'
@@ -78,10 +92,13 @@ jobs:
         OverWrite: true
         flattenFolders: true
 
-    - task: PublishSymbols@1
-      displayName: 'Enable Source Server'
-      inputs:
-        SymbolsFolder: '$(Build.ArtifactStagingDirectory)/symbols'
+    - ${{ if eq(parameters.indexSourcesAndPublishSymbols, 'true') }}:
+      - task: PublishSymbols@1
+        displayName: 'Enable Source Server'
+        inputs:
+          SymbolsFolder: '$(Build.ArtifactStagingDirectory)/symbols'
+          SearchPattern: '**\*.pdb'
+          SymbolServerType: TeamServices
 
     - task: PublishBuildArtifacts@1
       displayName: 'Publish Artifact: Symbols'
