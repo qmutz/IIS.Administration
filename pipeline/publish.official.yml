@@ -1,0 +1,9 @@
+name: $(Rev:rr)
+jobs:
+- template: template\publish.yml
+  parameters:
+    agentPoolName: 'VSEng-MicroBuildV2CustomPool'
+    agentPoolDemandTeam: 'IISAdmin'
+    solution: '**\Compression.sln'
+    signType: 'real'
+    indexSourcesAndPublishSymbols: 'true'
