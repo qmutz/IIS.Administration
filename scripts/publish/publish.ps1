@@ -118,7 +118,10 @@ if (-not([string]::IsNullOrEmpty($SignType))) {
 		}
 	}
 	catch {
-		throw "Could not find msbuild: $($_.Exception.Message)"
+        Write-Warning "Could not find msbuild: $($_.Exception.Message)"
+        Write-Host "Hacking: vsdir $env:VSINSTALLDIR"
+        $programFiles = ${env:ProgramFiles(x86)}
+        Get-ChildItem $programFiles
 	}
 
 	if ([string]::IsNullOrEmpty($SigningIdentity)) {
