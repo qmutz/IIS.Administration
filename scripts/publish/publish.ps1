@@ -120,8 +120,10 @@ if (-not([string]::IsNullOrEmpty($SignType))) {
 	catch {
         Write-Warning "Could not find msbuild: $($_.Exception.Message)"
         Write-Host "Hacking: vsdir $env:VSINSTALLDIR"
-        $vsDir = [System.IO.Path]::Combine(${env:ProgramFiles(x86)}, "Microsoft Visual Studio 14.0")
+        $vsDir = [System.IO.Path]::Combine(${env:ProgramFiles(x86)}, "Microsoft Visual Studio")
         Get-ChildItem $vsDir
+        $dir2017 = [System.IO.Path]::Combine(${env:ProgramFiles(x86)}, "Microsoft Visual Studio", "2017")
+        Get-ChildItem $dir2017
 	}
 
 	if ([string]::IsNullOrEmpty($SigningIdentity)) {
