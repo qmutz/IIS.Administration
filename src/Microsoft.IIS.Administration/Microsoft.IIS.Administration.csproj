@@ -19,6 +19,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="config\api-keys.json" />
+    <None Remove="config\appsettings.json" />
+    <None Remove="config\modules.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="wwwroot\**\*;Views\**\*">
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </None>
@@ -65,6 +71,18 @@
     <FilesToSign Include="$(IntermediateOutputPath)\$(TargetFileName);">
       <Authenticode>$(SigningIdentity)</Authenticode>
     </FilesToSign>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="config\api-keys.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="config\appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="config\modules.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!-- Workaround for: Files generated during build are not copying to publish directory on first publish https://github.com/dotnet/cli/issues/5498#issuecomment-275932671 -->
