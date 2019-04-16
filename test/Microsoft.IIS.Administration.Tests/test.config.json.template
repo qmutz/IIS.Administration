@@ -1,7 +1,7 @@
 ﻿{
   "ccs_user": "IisAdminCcsTestR",
   "project_path":  "%project_dir%",
-  "test_server": "https://localhost",
+  "test_server": "https://IISAdminLocalTest",
   "test_port": "44326",
   "test_root_path": "%iis_admin_test_dir%",
 }

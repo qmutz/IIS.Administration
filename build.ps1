@@ -94,22 +94,16 @@ function CleanUp() {
     }
 }
 
-function StartTestService($hold) {
-    $group = GetGlobalVariable IIS_ADMIN_API_OWNERS
-    $member = & ([System.IO.Path]::Combine($scriptDir, "setup", "security.ps1")) CurrentAdUser
-
+function StartTestService() {
     Write-Host "$(BuildHeader) Sanity tests..."
-    $pingEndpoint = "https://localhost:$testPort"
+    $pingEndpoint = "https://IISAdminLocalTest:$testPort"
     try {
         Invoke-WebRequest -UseDefaultCredentials -UseBasicParsing $pingEndpoint | Out-Null
     } catch {
-        Write-Error "Failed to ping test server $pingEndpoint, did you forget to start it manually?"
+        Write-Error "Failed to ping test server $pingEndpoint, did you forget to start it manually?`nError: $_"
         Exit 1
     }
 
-    if ($hold) {
-        Read-Host "Press enter to continue..."
-    }
 }
 
 function StartTest() {
@@ -210,9 +204,15 @@ try {
         StartTest
     }
 } catch {
+    if ($debug) {
+        Write-Warning "Script will fail with the error message:`n$_"
+    }
     throw
 } finally {
     Write-Host "$(BuildHeader) Final clean up..."
+    if ($debug) {
+        Read-Host "Press enter to continue..."
+    }
     CleanUp
 }
 

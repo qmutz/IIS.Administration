@@ -6,6 +6,7 @@ param(
 $CCS_FOLDER_NAME = "CentralCertStore"
 $CERTIFICATE_PASS = "abcdefg"
 $CERTIFICATE_NAME = "IISAdminLocalTest"
+$certStore = "Cert:\LocalMachine\My"
 
 function New-CcsSelfSignedCertificate($certName) {
     $command = Get-Command "New-SelfSignedCertificate"
@@ -13,24 +14,28 @@ function New-CcsSelfSignedCertificate($certName) {
 
     # Private key should be exportable
     if ($command.Parameters.Keys.Contains("KeyExportPolicy")) {
-        $cert = New-SelfSignedCertificate -KeyExportPolicy Exportable -DnsName $certName
+        $cert = New-SelfSignedCertificate -KeyExportPolicy Exportable -DnsName $certName -CertStoreLocation $certStore
     }
     else {
-        $cert = New-SelfSignedCertificate -DnsName $certName -CertStoreLocation Cert:\LocalMachine\My
+        $cert = New-SelfSignedCertificate -DnsName $certName -CertStoreLocation $certStore
     }
     $cert
 }
 
-$ccsPath = [System.IO.Path]::Combine($TestRoot, $CCS_FOLDER_NAME)
+$ccsDir = [System.IO.Path]::Combine($TestRoot, $CCS_FOLDER_NAME)
 
-if (-not(Test-Path $ccsPath)) {
-    New-Item -Type Directory -Path $ccsPath -ErrorAction Stop | Out-Null
+if (-not(Test-Path $ccsDir)) {
+    New-Item -Type Directory -Path $ccsDir -ErrorAction Stop | Out-Null
 }
 
 $cert = New-CcsSelfSignedCertificate -certName $CERTIFICATE_NAME
-Get-ChildItem Cert:\LocalMachine\My\ | Where-Object {$_.Subject -eq "CN=$CERTIFICATE_NAME"} | Remove-Item
+Get-ChildItem $certStore | Where-Object {$_.Subject -eq "CN=$CERTIFICATE_NAME"} | Remove-Item
 $bytes = $cert.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $CERTIFICATE_PASS)
-[System.IO.File]::WriteAllBytes([System.IO.Path]::Combine($ccsPath, $CERTIFICATE_NAME + ".pfx"), $bytes)
+$ccsPath = Join-Path $ccsDir "${CERTIFICATE_NAME}.pfx"
+Write-Host "Exported certification at $ccsPath"
+[System.IO.File]::WriteAllBytes($ccsPath, $bytes)
+
+Import-PfxCertificate -Password (ConvertTo-SecureString $CERTIFICATE_PASS -AsPlainText -Force) -CertStoreLocation "Cert:\LocalMachine\Root" -FilePath $ccsPath
 
 # Check for ccs entry in hosts file to allow local testing of ccs binding
 $hostFile = "C:\Windows\System32\drivers\etc\hosts"
