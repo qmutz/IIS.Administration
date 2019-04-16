@@ -77,6 +77,8 @@
     <EmbeddedResource Include="config\api-keys.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="config\appsettings.json" />
+    <EmbeddedResource Include="config\modules.json" />
     <EmbeddedResource Update="config\appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
