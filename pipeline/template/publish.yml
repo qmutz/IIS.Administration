@@ -33,7 +33,7 @@ jobs:
     - task: MSBuild@1
       displayName: 'Build Application'
       inputs:
-        solution: src/Microsoft.IIS.Administration/Microsoft.IIS.Administration.csproj
+        msbuildLocation: src/Microsoft.IIS.Administration
         msbuildVersion: 14.0
         configuration: ${{ parameters.buildConfiguration }}
         msbuildArguments: '/t:publish /p:Configuration=${{ parameters.buildConfiguration }} /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration /p:SignType=${{ parameters.signType }} /p:SigningIdentity=${{ parameters.signingIdentity }}'
@@ -41,7 +41,7 @@ jobs:
     - task: MSBuild@1
       displayName: 'Build Packager'
       inputs:
-        solution: src/Packager/Bundle/Bundle.csproj
+        msbuildLocation: src/Packager/Bundle
         msbuildVersion: 14.0
         configuration: ${{ parameters.buildConfiguration }}
         msbuildArguments: '/t:publish /p:Configuration=${{ parameters.buildConfiguration }} /p:PublishDir=$(Build.ArtifactStagingDirectory)/IIS.Administration/Microsoft.IIS.Administration/plugins /p:SignType=${{ parameters.signType }} /p:SigningIdentity=${{ parameters.signingIdentity }}'
@@ -49,7 +49,7 @@ jobs:
     - task: MSBuild@1
       displayName: 'Build setup scripts'
       inputs:
-        solution: scripts/Microsoft.IIS.Administration.PsSetup.csproj
+        msbuildLocation: scripts
         msbuildVersion: 14.0
         configuration: ${{ parameters.buildConfiguration }}
         msbuildArguments: '/p:SignType=${{ parameters.signType }} /p:SigningIdentity=${{ parameters.signingIdentity }}'
